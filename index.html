@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="An anonymous note. Five sealed case files. A story waiting to be finished.">
+<title>The Unfinished Story</title>
+<link rel="stylesheet" href="./style.css">
+<script defer src="./script.js"></script>
+</head>
+<body>
+<header class="bar">
+  <span class="brand"><span class="brand-icon" aria-hidden="true">◇</span> The Unfinished Story</span>
+  <div class="tools"><button id="sound" aria-pressed="false">Sound off</button><button id="journal" hidden>Journal</button></div>
+</header>
+<main id="main"></main>
+<footer><span id="save-status"></span><button id="restart" hidden>Restart case</button></footer>
+<dialog id="drawer" aria-labelledby="drawer-title">
+  <div class="dialog-head"><h2 id="drawer-title"></h2><form method="dialog"><button id="close">Close</button></form></div>
+  <div id="drawer-content"></div>
+</dialog>
+<noscript>Enable JavaScript to open the case files.</noscript>
+</body>
+</html>
