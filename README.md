@@ -4,7 +4,7 @@ An anonymous dispatch leads to five sealed case files. Inspect locked boxes, sen
 
 ## Play offline
 
-Keep `index.html`, `style.css`, `puzzles.js` and `script.js` together, then open `index.html` in a modern browser. No installation or build is required. Progress and the sound preference are stored in the current browser. Use the same browser and address to resume.
+Keep the project files and the `scenery/` folder together, then open `index.html` in a modern browser. The room artwork is bundled as WebP and works offline. No installation or build is required. Progress and the sound preference are stored in the current browser. Use the same browser and address to resume.
 
 ## GitHub Pages
 

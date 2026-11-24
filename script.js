@@ -85,7 +85,7 @@ function welcome() {
         <p class="muted">A sealed dispatch was pushed under your door. The paper is cold. Inside, someone has crossed out the return address and left one line: <em>They’ve taken my name off the register. Come before the last bell.</em></p>
         <button class="primary" data-action="start">${state.started ? 'Continue investigation' : 'Open the first file'}</button>
       </div>
-      <div class="cover" aria-hidden="true"><div class="cover-light"></div><div class="envelope"><span class="seal">◇</span></div></div>
+      <div class="cover" aria-hidden="true"><i class="scene-dust"></i></div>
     </section>`;
 }
 
@@ -106,18 +106,17 @@ function puzzleContent(index) {
 }
 
 const locations = [
-  ['Lost property office', '<i class="sc-shelves"></i><i class="sc-crate sc-crate-left"></i><i class="sc-crate sc-crate-right"></i><i class="sc-lamp"></i>'],
-  ['Freight lift', '<i class="sc-lift"><b></b></i><i class="sc-dial"></i>'],
-  ['Speaking-pipe works', '<i class="sc-pipes"></i><i class="sc-fan"><b></b></i><i class="sc-steam"></i>'],
-  ['Service stairs', '<i class="sc-landing"></i><i class="sc-grille"></i><i class="sc-stairs"></i><i class="sc-lamp"></i>'],
-  ['The passage below', '<i class="sc-arch"></i><i class="sc-rails"></i><i class="sc-distant"></i>']
+  'Lost property office',
+  'Freight lift',
+  'Speaking-pipe works',
+  'Service stairs',
+  'The passage below'
 ];
 
 function locationHeader(index, title) {
-  const [location, artwork] = locations[index];
   return `<header class="location location-${index}">
-    <div class="location-art" aria-hidden="true">${artwork}<i class="sc-air"></i></div>
-    <div class="location-caption"><span class="kicker">${location}</span><h1 tabindex="-1">${title}</h1></div>
+    <div class="location-art" aria-hidden="true"><i class="scene-dust"></i></div>
+    <div class="location-caption"><span class="kicker">${locations[index]}</span><h1 tabindex="-1">${title}</h1></div>
   </header>`;
 }
 
