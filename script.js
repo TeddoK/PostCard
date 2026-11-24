@@ -105,14 +105,30 @@ function puzzleContent(index) {
     <ol id="hints" class="hints" aria-live="polite" ${hints.length ? '' : 'hidden'}>${hints.map(hint => `<li>${hint}</li>`).join('')}</ol>`;
 }
 
+const locations = [
+  ['Lost property office', '<i class="sc-shelves"></i><i class="sc-crate sc-crate-left"></i><i class="sc-crate sc-crate-right"></i><i class="sc-lamp"></i>'],
+  ['Freight lift', '<i class="sc-lift"><b></b></i><i class="sc-dial"></i>'],
+  ['Speaking-pipe works', '<i class="sc-pipes"></i><i class="sc-fan"><b></b></i><i class="sc-steam"></i>'],
+  ['Service stairs', '<i class="sc-landing"></i><i class="sc-grille"></i><i class="sc-stairs"></i><i class="sc-lamp"></i>'],
+  ['The passage below', '<i class="sc-arch"></i><i class="sc-rails"></i><i class="sc-distant"></i>']
+];
+
+function locationHeader(index, title) {
+  const [location, artwork] = locations[index];
+  return `<header class="location location-${index}">
+    <div class="location-art" aria-hidden="true">${artwork}<i class="sc-air"></i></div>
+    <div class="location-caption"><span class="kicker">${location}</span><h1 tabindex="-1">${title}</h1></div>
+  </header>`;
+}
+
 function stageScreen() {
   const index = state.stage;
   const stage = stages[index];
   const solved = index < state.completed;
   main.innerHTML = progress() + `
     <article class="stage scene-${index}">
-      <span class="kicker">Case file ${String(index + 1).padStart(2, '0')}</span>
-      <h1 tabindex="-1">${stage.title}</h1><p class="note">${stage.note}</p>
+      ${locationHeader(index, stage.title)}
+      <p class="note">${stage.note}</p>
       ${solved ? `<section class="success" tabindex="-1"><h2>File complete</h2>
         ${index === 0 ? '<span class="brass-pass" aria-hidden="true">◇</span>' : ''}
         ${index === 2 ? pipeBoard(true) : ''}
@@ -142,6 +158,11 @@ function refreshPuzzle(button, message = '') {
     'test-line': '.pipe-grid'
   }[button.dataset.action];
   if (effectTarget) puzzle.querySelector(effectTarget)?.classList.add('is-playing');
+  if (['send', 'test-line', 'walk', 'knock', 'listen', 'gate'].includes(button.dataset.action)) {
+    const location = main.querySelector('.location');
+    location.classList.remove('scene-response');
+    requestAnimationFrame(() => requestAnimationFrame(() => location.classList.add('scene-response')));
+  }
   if (message) {
     const feedback = main.querySelector('#feedback');
     feedback.textContent = message;
