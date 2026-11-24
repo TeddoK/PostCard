@@ -78,14 +78,14 @@ function headingFocus() {
 function welcome() {
   main.innerHTML = `
     <section class="welcome">
-      <div>
+      <div class="welcome-copy">
         <span class="kicker">The dispatch archive</span>
         <h1 tabindex="-1">The Unfinished Story</h1>
         <p class="subtitle">Every mystery begins somewhere. Not every ending is what it seems.</p>
-        <p class="muted">An unsigned note has arrived with five sealed files. Something is missing from the record, and somebody went to a great deal of trouble to make sure you’d notice.</p>
+        <p class="muted">A sealed dispatch was pushed under your door. The paper is cold. Inside, someone has crossed out the return address and left one line: <em>They’ve taken my name off the register. Come before the last bell.</em></p>
         <button class="primary" data-action="start">${state.started ? 'Continue investigation' : 'Open the first file'}</button>
       </div>
-      <div class="cover" aria-hidden="true"><div class="envelope"><span class="seal">◇</span></div></div>
+      <div class="cover" aria-hidden="true"><div class="cover-light"></div><div class="envelope"><span class="seal">◇</span></div></div>
     </section>`;
 }
 
