@@ -20,6 +20,7 @@ let state = load();
 let audio;
 
 const main = document.querySelector('#main');
+const world = document.querySelector('#world');
 const drawer = document.querySelector('#drawer');
 const drawerTitle = document.querySelector('#drawer-title');
 const drawerContent = document.querySelector('#drawer-content');
@@ -75,25 +76,46 @@ function headingFocus() {
   heading.focus({ preventScroll: true });
   window.scrollTo(0, 0);
 }
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+let depthFrame = 0;
+function updateDepth() {
+  world.style.setProperty('--depth', Math.min(48, Math.max(0, scrollY * .1)) + 'px');
+  depthFrame = 0;
+}
+window.addEventListener('scroll', () => {
+  if (!reducedMotion.matches && !depthFrame) depthFrame = requestAnimationFrame(updateDepth);
+}, { passive: true });
+
+function showWorld(place) {
+  if (world.dataset.place === String(place)) return;
+  world.dataset.place = place;
+  world.innerHTML = `<div class="world-scene">
+    <div class="world-painting"></div><div class="world-air"></div>
+    <div class="world-foreground"></div><div class="world-light"></div>
+  </div>`;
+  updateDepth();
+}
+
 function welcome() {
+  showWorld('welcome');
   main.innerHTML = `
     <section class="welcome">
       <div class="welcome-copy">
         <span class="kicker">The dispatch archive</span>
         <h1 tabindex="-1">The Unfinished Story</h1>
         <p class="subtitle">Every mystery begins somewhere. Not every ending is what it seems.</p>
-        <p class="muted">Mira taught you to knock on her door in the dark. Last night you knocked and nobody answered. This morning you found a note in her hand: <em>I took work across the water. I thought I could come home.</em></p>
+        <p class="muted">Mira taught you to knock on her door in the dark. Last night, nobody answered. This morning you found a note in her hand.</p>
+        <blockquote class="dispatch-line">I took work across the water. I thought I could come home.</blockquote>
         <button class="primary" data-action="start">${state.started ? 'Continue investigation' : 'Open the first file'}</button>
       </div>
-      <div class="cover" aria-hidden="true"><i class="scene-dust"></i></div>
     </section>`;
 }
 
 function progress() {
-  return `<nav aria-label="Case file progress"><ol class="steps">${stages.map((stage, i) => {
+  return `<nav class="route" aria-label="Case file progress"><ol class="steps">${stages.map((stage, i) => {
     const locked = i > state.completed;
     const status = i < state.completed ? 'complete' : locked ? 'locked' : 'available';
-    return `<li><button data-action="stage" data-value="${i}" aria-label="File ${i + 1}: ${stage.title}, ${status}" ${locked ? 'disabled' : ''} ${i === state.stage ? 'aria-current="step"' : ''}>${String(i + 1).padStart(2, '0')}${i < state.completed ? ' ✓' : locked ? ' ·' : ''}</button></li>`;
+    return `<li><button data-action="stage" data-value="${i}" aria-label="File ${i + 1}: ${stage.title}, ${status}" ${locked ? 'disabled' : ''} ${i < state.completed ? 'data-cleared' : ''} ${i === state.stage ? 'aria-current="step"' : ''}><span class="route-node" aria-hidden="true">${['I', 'II', 'III', 'IV', 'V'][i]}</span></button></li>`;
   }).join('')}</ol></nav>`;
 }
 function puzzleContent(index) {
@@ -113,27 +135,23 @@ const locations = [
   'The ascent'
 ];
 
-function locationHeader(index, title) {
-  return `<header class="location location-${index}">
-    <div class="location-art" aria-hidden="true"><i class="scene-dust"></i></div>
-    <div class="location-caption"><span class="kicker">${locations[index]}</span><h1 tabindex="-1">${title}</h1></div>
-  </header>`;
-}
-
 function stageScreen() {
   const index = state.stage;
   const stage = stages[index];
   const solved = index < state.completed;
+  showWorld(index);
   main.innerHTML = progress() + `
     <article class="stage scene-${index}">
-      ${locationHeader(index, stage.title)}
-      <p class="note">${stage.note}</p>
-      ${solved ? `<section class="success" tabindex="-1"><h2>File complete</h2>
+      <header class="location location-${index}">
+        <span class="kicker">${locations[index]}</span><h1 tabindex="-1">${stage.title}</h1>
+        <p class="note">${stage.note}</p>
+      </header>
+      <div class="puzzle-surface">${solved ? `<section class="success" tabindex="-1"><h2>File complete</h2>
         ${index === 0 ? '<span class="brass-pass" aria-hidden="true">◇</span>' : ''}
         ${index === 2 ? pipeBoard(true) : ''}
         <p>${stage.explanation}</p><p><strong>Journal entry.</strong> ${stage.clue}</p>
         <button class="primary" data-action="next">${index === 4 ? 'Read the restored page' : 'Open the next file'}</button></section>`
-      : `<div id="puzzle" class="form">${puzzleContent(index)}</div>`}
+      : `<div id="puzzle" class="form">${puzzleContent(index)}</div>`}</div>
     </article>`;
 }
 
@@ -158,10 +176,10 @@ function refreshPuzzle(button, message = '') {
   }[button.dataset.action];
   if (effectTarget) puzzle.querySelector(effectTarget)?.classList.add('is-playing');
   if (['cross', 'send', 'test-line', 'walk', 'knock', 'listen', 'gate', 'forward'].includes(button.dataset.action)) {
-    const location = main.querySelector('.location');
+    const scene = world.firstElementChild;
     const effect = button.dataset.action === 'cross' ? 'scene-cross' : 'scene-response';
-    location.classList.remove(effect);
-    requestAnimationFrame(() => requestAnimationFrame(() => location.classList.add(effect)));
+    scene.classList.remove(effect);
+    requestAnimationFrame(() => requestAnimationFrame(() => scene.classList.add(effect)));
   }
   if (message) {
     const feedback = main.querySelector('#feedback');
@@ -175,6 +193,7 @@ function refreshPuzzle(button, message = '') {
 }
 
 function reveal(complete) {
+  showWorld(complete ? 'daylight' : '4');
   main.innerHTML = `<article class="reveal ${complete ? 'curtain-up' : ''}">
     ${complete ? `<span class="kicker">Or perhaps it’s just the beginning.</span>
       <h1 tabindex="-1">HADESTOWN</h1><p class="subtitle">LIVERPOOL EMPIRE THEATRE</p>
