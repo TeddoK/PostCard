@@ -9,7 +9,7 @@ let storageAvailable = true;
 function load() {
   try {
     const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
-    if (saved) return { ...fresh(), ...saved };
+    if (saved) return { ...fresh(), ...saved, play: { ...freshPuzzles(), ...saved.play } };
     const previous = JSON.parse(localStorage.getItem('unfinished-story-v1') || 'null');
     return fresh(previous?.sound === true);
   } catch {
@@ -110,10 +110,12 @@ function stageScreen() {
   const stage = stages[index];
   const solved = index < state.completed;
   main.innerHTML = progress() + `
-    <article class="stage">
+    <article class="stage scene-${index}">
       <span class="kicker">Case file ${String(index + 1).padStart(2, '0')}</span>
       <h1 tabindex="-1">${stage.title}</h1><p class="note">${stage.note}</p>
       ${solved ? `<section class="success" tabindex="-1"><h2>File complete</h2>
+        ${index === 0 ? '<span class="brass-pass" aria-hidden="true">◇</span>' : ''}
+        ${index === 2 ? pipeBoard(true) : ''}
         <p>${stage.explanation}</p><p><strong>Journal entry.</strong> ${stage.clue}</p>
         <button class="primary" data-action="next">${index === 4 ? 'Read the restored page' : 'Open the next file'}</button></section>`
       : `<div id="puzzle" class="form">${puzzleContent(index)}</div>`}
@@ -129,9 +131,17 @@ function refreshPuzzle(button, message = '') {
   const sameControl = [...main.querySelectorAll('[data-action]')].find(control =>
     !control.disabled && control.dataset.action === button.dataset.action &&
     control.dataset.value === button.dataset.value);
-  const nextAction = { beat: 'send', send: 'hear-reply', gate: 'knock', look: 'gate' }[button.dataset.action];
+  const nextAction = { beat: 'send', send: 'hear-reply', walk: 'walk', gate: 'knock', look: 'gate' }[button.dataset.action];
   const fallback = (nextAction && puzzle.querySelector(`[data-action="${nextAction}"]:not(:disabled)`))
     || puzzle.querySelector('button:not(:disabled)');
+  const effectTarget = {
+    beat: '.signal-board',
+    send: message ? '.signal-board' : '.signal-board + .paper',
+    knock: `.gate:nth-child(${Number(button.dataset.value) + 1})`,
+    listen: '.listening-result + .gates .gate:nth-child(2)',
+    'test-line': '.pipe-grid'
+  }[button.dataset.action];
+  if (effectTarget) puzzle.querySelector(effectTarget)?.classList.add('is-playing');
   if (message) {
     const feedback = main.querySelector('#feedback');
     feedback.textContent = message;
@@ -144,7 +154,7 @@ function refreshPuzzle(button, message = '') {
 }
 
 function reveal(complete) {
-  main.innerHTML = `<article class="reveal">
+  main.innerHTML = `<article class="reveal ${complete ? 'curtain-up' : ''}">
     ${complete ? `<span class="kicker">Or perhaps it’s just the beginning.</span>
       <h1 tabindex="-1">HADESTOWN</h1><p class="subtitle">LIVERPOOL EMPIRE THEATRE</p>
       <strong class="gift">TWO TICKETS!</strong>
@@ -206,6 +216,11 @@ main.addEventListener('click', event => {
       break;
     }
     default: {
+      if (action === 'hear-reply') {
+        const response = button.closest('.paper');
+        response.querySelector('.beats').outerHTML = beats(reply);
+        response.classList.add('is-playing');
+      }
       const result = puzzleAction(action, value);
       if (result === 'complete') {
         state.completed++;
@@ -230,8 +245,16 @@ sound.addEventListener('click', () => {
 journal.addEventListener('click', () => {
   const entries = stages.slice(0, state.completed);
   showDialog('Investigation journal', entries.length
-    ? entries.map(stage => `<section class="paper"><h2>${stage.title}</h2><p>${stage.clue}</p></section>`).join('')
+    ? entries.map((stage, i) => `<section class="paper"><h2>${stage.title}</h2><p>${stage.clue}</p>
+      ${i === 1 ? `<div id="journal-reply">${beats(reply)}</div><button id="replay-reply" type="button">Replay Mira’s reply</button>` : ''}
+      </section>`).join('')
     : '<p>The journal is empty. A recovered clue will be filed here when you solve the first file.</p>');
+  drawerContent.querySelector('#replay-reply')?.addEventListener('click', () => {
+    const rhythm = drawerContent.querySelector('#journal-reply');
+    rhythm.innerHTML = beats(reply);
+    rhythm.classList.add('is-playing');
+    playRhythm(reply);
+  });
 });
 restart.addEventListener('click', () => {
   showDialog('Restart investigation?', '<p>This clears the clues, hints and puzzle progress saved on this device.</p><button class="primary" id="confirm-restart">Clear progress and restart</button>');
