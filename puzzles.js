@@ -3,14 +3,14 @@
 const stages = [
   {
     title: 'Lost Property',
-    note: 'Mira left you something in lost property. The clerk has set every latch to lock after one opening. He calls this customer service.',
+    note: 'Mira left a brass pass in lost property. Four claim tags are tied to four locked boxes. Two tags are telling the truth. The clerk insists this counts as a filing system.',
     hints: [
-      'Read Mira’s postcard and inspect the outside of each box.',
-      'The notice tells you when the boxes were replaced. Anything that was already on a shelf will have a dust outline underneath.',
-      'Two boxes have clean shelves. Of those, only one could have made a brown ring on the windowsill.'
+      'Imagine the pass is in one particular box. Read all four tags and see which claims would be true.',
+      'The tin’s tag agrees with the oak’s. Those two are either both right or both wrong.',
+      'If the oak tag were right, the tin and painted tags would also be right. That would make three true tags.'
     ],
-    clue: 'Mira’s brass pass was stuffed into a tin with a damp base. Its inscription reads “Tap twice. Then hold.”',
-    explanation: 'The tin and the leather case arrived after cleaning. Only the damp, rusty tin matches the ring Mira left on the sill.'
+    clue: 'Mira’s brass pass was in the tin box. Its inscription reads “Tap twice. Then hold.”',
+    explanation: 'If the pass were in the leather or painted box, three tags would be true. If it were in the oak, none would be true. Only the tin makes exactly two true: the leather and painted tags.'
   },
   {
     title: 'The Other Side',
@@ -59,10 +59,10 @@ const stages = [
 ];
 
 const boxes = [
-  { name: 'Oak box', mark: 'Oak', detail: 'There is a pale rectangle of clean wood under the box. The rest of the shelf is dusty.', wrong: 'Inside is an inventory of spare hinges. Several have been marked “emotionally unavailable”.' },
-  { name: 'Leather case', mark: 'Leather', detail: 'The shelf has been wiped underneath it. The base is dry and covered in soft felt.', wrong: 'You find a sandwich with its own inventory number. Best leave it to the proper authorities.' },
-  { name: 'Tin box', mark: 'Tin', detail: 'The shelf is clean underneath. A damp line of rust runs around the bottom rim.' },
-  { name: 'Painted box', mark: 'Painted', detail: 'It has a rusty rim and a thick coat of dust underneath. Its position on the shelf has left a clean outline.', wrong: 'It contains a note that says “DO NOT OPEN AGAIN.” Fair enough.' }
+  { name: 'Oak box', claim: 'The pass is in the leather case or the painted box.', wrong: 'Inside is an inventory of spare hinges. Several have been marked “emotionally unavailable”.' },
+  { name: 'Leather case', claim: 'The pass is in the tin box.', wrong: 'You find a sandwich with its own inventory number. Best leave it to the proper authorities.' },
+  { name: 'Tin box', claim: 'The oak box’s tag is telling the truth.' },
+  { name: 'Painted box', claim: 'The pass isn’t in the oak box.', wrong: 'It contains a note that says “DO NOT OPEN AGAIN.” Fair enough.' }
 ];
 const call = 'SSL';
 const reply = 'LSL';
@@ -94,12 +94,12 @@ function beats(pattern) {
 function boxPuzzle() {
   return `<div class="evidence">
     <section class="paper"><span class="kicker">Mira’s postcard</span>
-    <p>“I set the box on the windowsill while I waited. It left a damp brown ring. I put it on the shelf just as the clerk finished wiping it down.”</p></section>
-    <details class="paper"><summary>Clerk’s notice</summary><p>I wiped the whole shelf around the boxes that were already there. Anything delivered afterwards went on a clean patch. If you want me to lift the heavy ones, you can apply for my job.</p></details></div>
-    <p>Inspect the boxes before opening one.</p>
+    <p>“Exactly one box holds my pass. Exactly two tags tell the truth. Work out where I put it before you open anything.”</p></section></div>
+    <p>Read the tags, then select the box you want to open.</p>
     <div class="box-grid">${boxes.map((box, i) => `<section class="box-card ${state.play.box === i ? 'selected' : ''}">
       ${control('inspect', i, `<span class="box-art" aria-hidden="true"></span>${box.name}`, `aria-pressed="${state.play.box === i}"`)}
-      ${state.play.box === i ? `<p>${box.detail}</p>
+      <p class="claim-tag">${box.claim}</p>
+      ${state.play.box === i ? `
         ${state.play.opened.includes(i) ? `<p class="box-result">${box.wrong}</p>` : control('open-box', i, `Open ${box.name.toLowerCase()}`, 'class="primary"')}` : ''}
     </section>`).join('')}</div>`;
 }
