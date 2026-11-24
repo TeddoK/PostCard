@@ -57,7 +57,7 @@ main { padding: 1.25rem 0 1rem; }
   grid-area: art; position: relative; isolation: isolate; overflow: hidden;
   min-height: clamp(13rem, 46vw, 30rem); width: 100%;
   border: 1px solid #664354; border-radius: .35rem;
-  background: #1f1724 url('./scenery/dispatch.webp?v=1ba448eca3ad') 56% 69% / cover no-repeat;
+  background: #1f1724 url('./scenery/dispatch.webp?v=1dac2a000335') 56% 69% / cover no-repeat;
   box-shadow: 0 1rem 3rem #07050b90;
 }
 .cover::after {
@@ -240,11 +240,11 @@ details.paper { padding-block: .1rem; }
 .location-caption { padding: clamp(.85rem, 3vw, 1.55rem); }
 .location .location-caption h1 { margin: 0; text-shadow: 0 2px 12px #0a070b; line-height: 1.02; }
 .location .location-caption .kicker { margin-bottom: .38rem; color: #ffd5a8; }
-.location-0 { --scene: url('./scenery/dispatch.webp?v=1ba448eca3ad'); --scene-position: 50% 28%; }
-.location-1 { --scene: url('./scenery/lift.webp?v=089c074aca0b'); --scene-position: 50% 54%; }
-.location-2 { --scene: url('./scenery/works.webp?v=668dd683b010'); --scene-position: 50% 51%; }
-.location-3 { --scene: url('./scenery/stairs.webp?v=4d8ada35cada'); --scene-position: 50% 54%; }
-.location-4 { --scene: url('./scenery/passage.webp?v=a702939b27fa'); --scene-position: 50% 56%; }
+.location-0 { --scene: url('./scenery/wayhouse.webp?v=684758a5ac04'); --scene-position: 50% 28%; }
+.location-1 { --scene: url('./scenery/ferry.webp?v=9a8b1a023f95'); --scene-position: 50% 54%; }
+.location-2 { --scene: url('./scenery/grotto.webp?v=a876777101af'); --scene-position: 50% 51%; }
+.location-3 { --scene: url('./scenery/gates.webp?v=99ecec699ca1'); --scene-position: 50% 54%; }
+.location-4 { --scene: url('./scenery/passage.webp?v=66fbc569c59e'); --scene-position: 50% 56%; }
 .scene-dust {
   position: absolute; inset: 4% 5% 12% 15%; pointer-events: none;
   background: radial-gradient(circle at 15% 30%, #ffe1a8 0 1px, transparent 2px),
@@ -263,3 +263,8 @@ details.paper { padding-block: .1rem; }
 }
 .scene-response .location-art { animation: room-knock .72s ease-out; }
 @keyframes room-knock { 30% { filter: brightness(1.27); } }
+.location-1.scene-cross .location-art { animation: cross-water 1.35s cubic-bezier(.16,.74,.29,1) both; }
+@keyframes cross-water { from { transform: scale(1.16) translateX(-4%); filter: brightness(.6); } }
+.ascent-0 { background: linear-gradient(145deg, #29232d, #15131c); }
+.ascent-1 { background: #15131c; }
+.ascent-2 { background: radial-gradient(ellipse at 75% 0%, #524331, #201c25 78%); border-color: #aa865e; }

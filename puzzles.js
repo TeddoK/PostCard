@@ -3,7 +3,7 @@
 const stages = [
   {
     title: 'Lost Property',
-    note: 'Mira left a brass pass in lost property. Four claim tags are tied to four locked boxes. Two tags are telling the truth. The clerk insists this counts as a filing system.',
+    note: 'At the last shelter before the river, you find four locked travelling chests. Mira left a brass pass in one of them. She used to leave riddles like this for you when you stayed out too late.',
     hints: [
       'Imagine the pass is in one particular box. Read all four tags and see which claims would be true.',
       'The tin’s tag agrees with the oak’s. Those two are either both right or both wrong.',
@@ -14,7 +14,7 @@ const stages = [
   },
   {
     title: 'The Other Side',
-    note: 'The brass pass fits a hatch in the old freight lift. Beneath the bell, someone has scratched four words: Leave room for an answer.',
+    note: 'Mira’s brass pass lets you take the crossing. The ferryman points to a landing on the far bank. Something taps from inside the stone.',
     hints: [
       'Look in the journal for the words engraved on the brass pass.',
       'A tap makes a short mark and a hold makes a long one. Use the controls to build the signal, then send it.',
@@ -25,7 +25,7 @@ const stages = [
   },
   {
     title: 'A Line Through the Wall',
-    note: 'Below the freight lift, the factory has gone quiet. Mira tries to carry the rhythm through the speaking pipes, but someone has taken the line apart.',
+    note: 'Mira is behind the wall. She can reach the stairs if you guide her, but further down she won’t be able to hear you. The stone channels used to carry voices from bank to bank.',
     hints: [
       'Start at the brass inlet at the upper left. Rotate its elbow until it points left and down.',
       'A lit tile gets air from the inlet. At the last lit tile, check that its exit lines up with the opening of the next tile.',
@@ -36,7 +36,7 @@ const stages = [
   },
   {
     title: 'Two Ways Through',
-    note: 'At the foot of the stairs, a painted sign promises nobody will be left behind. The doors were built for shifts of one. Mira braces the first gate with her boot.',
+    note: 'You meet at two stone gates. The keeper here finally tells you what Mira was promised: work for a winter, food and shelter in return. The season is over. The doors have stayed shut.',
     hints: [
       'Leave one person on the bell plate while the other crosses the shutter.',
       'Once someone reaches the gallery, send them to the lamp plate. Keep the person on the bell plate where they are.',
@@ -47,7 +47,7 @@ const stages = [
   },
   {
     title: 'The Last Passage',
-    note: 'The stairwell bell falls quiet. You go first where the passage narrows. Somewhere behind you, Mira keeps time against the wall.',
+    note: 'The keeper agrees to let you both leave on one condition. You walk ahead. Mira follows. If you turn before the two of you reach daylight, the way opens only for you.',
     hints: [
       'You can knock on each gate’s speaking tube before you decide where to go.',
       'Mira’s reply is filed in the journal. The rhythm you sent to call her was different.',
@@ -79,10 +79,10 @@ const chambers = [
 
 function freshPuzzles() {
   return {
-    box: null, opened: [], boxMarks: [], rhythm: '', response: '',
+    box: null, opened: [], boxMarks: [], crossed: false, rhythm: '', response: '',
     pipes: [1, 0, 3, 1, 1, 1, 0, 3, 0],
     travellers: [0, 0], active: 0, moves: [],
-    chamber: 0, heard: [], listened: false, threshold: false
+    chamber: 0, heard: [], listened: false, threshold: false, ascent: 0
   };
 }
 function control(action, value, label, extra = '') {
@@ -114,8 +114,11 @@ function boxPuzzle() {
     }).join('')}</div>`;
 }
 function signalPuzzle() {
-  const { rhythm, response } = state.play;
-  return `<section class="paper"><span class="kicker">Speaking hatch</span><p>Send the signal engraved on your pass. You can see the knocks as well as hear them.</p></section>
+  const { crossed, rhythm, response } = state.play;
+  if (!crossed && !rhythm && !response) return `<section class="paper"><span class="kicker">The crossing</span>
+    <p>The ferryman holds out his hand. When he sees the pass, he pushes the boat out into the dark.</p>
+    ${control('cross', '', 'Cross the water', 'class="primary"')}</section>`;
+  return `<section class="paper"><span class="kicker">The landing</span><p>Knock on the stone using the signal engraved on Mira’s pass. The wood on this side will carry it to her.</p></section>
     <div class="signal-board"><span class="diaphragm" aria-hidden="true"></span><p>Your signal</p>${rhythm ? beats(rhythm) : '<p class="muted">No knocks yet.</p>'}
       <div class="actions">
         ${control('beat', 'S', 'Tap · short', rhythm.length >= 3 ? 'disabled' : '')}
@@ -125,7 +128,7 @@ function signalPuzzle() {
       </div>
     </div>
     ${response ? `<section class="paper"><h2>From the other side</h2>${beats(response)}
-      <p>“It’s Mira. I’ll wait for you to knock before I answer. If you hear me when you haven’t knocked, keep walking.”</p>
+      <p>“You came. I thought you might.” Mira pauses. “I’ll wait for you to knock before I answer. The walls remember voices here. Sometimes they give them back.”</p>
       ${control('hear-reply', '', 'Hear reply again')}
       ${control('finish-signal', '', 'Keep the line open', 'class="primary"')}</section>` : ''}`;
 }
@@ -149,7 +152,7 @@ function pipeFlow() {
   return reached;
 }
 function pipePuzzle() {
-  return `<section class="paper"><p>Turn the tubes to carry the signal from the inlet at <strong>A’s left edge</strong> to the outlet at <strong>I’s right edge</strong>. Connected tubes light up. Press the test button to send a knock.</p></section>
+  return `<section class="paper"><p>Turn the stone channels to carry the signal from the inlet at <strong>A’s left edge</strong> to the outlet at <strong>I’s right edge</strong>. Connected tubes light up. Press the test button to send a knock.</p></section>
     ${pipeBoard()}
     <div class="actions">${control('test-line', '', 'Send a knock through', 'class="primary"')}</div>`;
 }
@@ -193,13 +196,22 @@ function stairPuzzle() {
 }
 function passagePuzzle() {
   const { chamber, heard, threshold } = state.play;
-  if (threshold) return `<section class="threshold">
-    <p>The passage opens onto a square of daylight. Behind you the floorboards creak, then fall quiet.</p>
-    <p>Mira gives the reply one more time. You can hear the last knock through the soles of your shoes.</p>
-    ${beats(reply)}<div class="actions">
-      ${control('forward', '', 'Step into daylight', 'class="primary"')}
-      ${control('look', '', 'Look back')}
-    </div></section>`;
+  if (threshold) {
+    const ascent = state.play.ascent;
+    const steps = [
+      'Mira gives the reply one more time. You hear her take the first step behind you.',
+      'Loose stone falls into the dark. You stop and wait. Nothing calls your name.',
+      'Daylight reaches your hands. Mira is still on the last stair. One more step will give her room to come through.'
+    ];
+    return `<section class="threshold ascent ascent-${ascent}">
+      <h2>${['The first step', 'The silence', 'Daylight'][ascent]}</h2>
+      <p role="status">${steps[ascent]}</p>
+      ${ascent === 0 ? beats(reply) : ''}
+      <div class="actions">
+        ${control('forward', '', ascent === 2 ? 'Step into daylight' : 'Take another step', 'class="primary"')}
+        ${control('look', '', 'Look back')}
+      </div></section>`;
+  }
   const scene = chambers[chamber];
   const atBend = chamber === 1;
   const status = state.play.listened ? '<p class="listening-result">Only the blue tube plays while you stand in silence.</p>' : '';
@@ -242,6 +254,9 @@ function puzzleAction(action, value) {
       if (index === 2) return 'complete';
       p.opened.push(index);
       return 'render';
+    case 'cross':
+      p.crossed = true;
+      return 'render';
     case 'beat':
       if (p.rhythm.length < 3) p.rhythm += value;
       playRhythm(value);
@@ -250,7 +265,7 @@ function puzzleAction(action, value) {
       p.rhythm = '';
       return 'render';
     case 'send':
-      if (p.rhythm !== call) return 'The hatch clicks once and stays shut. Check the instruction on the pass.';
+      if (p.rhythm !== call) return 'The hatch clicks against the stone and stays shut. Check the instruction on the pass.';
       p.response = reply;
       playRhythm(reply);
       return 'render';
@@ -313,8 +328,12 @@ function puzzleAction(action, value) {
       return 'render';
     case 'look':
       p.threshold = false;
-      return 'The echo swallows the corridor for a moment. You are back at the last gate. The reply is still in your journal.';
+      p.ascent = 0;
+      return 'You turn. Mira’s step goes quiet, and the passage returns you to the last gate. This time you already know the way.';
     case 'forward':
-      if (p.threshold) return 'complete';
+      if (!p.threshold) return;
+      if (p.ascent === 2) return 'complete';
+      p.ascent++;
+      return 'render';
   }
 }

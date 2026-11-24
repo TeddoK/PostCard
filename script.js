@@ -82,7 +82,7 @@ function welcome() {
         <span class="kicker">The dispatch archive</span>
         <h1 tabindex="-1">The Unfinished Story</h1>
         <p class="subtitle">Every mystery begins somewhere. Not every ending is what it seems.</p>
-        <p class="muted">A sealed dispatch was pushed under your door. The paper is cold. Inside, someone has crossed out the return address and left one line: <em>They’ve taken my name off the register. Come before the last bell.</em></p>
+        <p class="muted">Mira taught you to knock on her door in the dark. Last night you knocked and nobody answered. This morning you found a note in her hand: <em>I took work across the water. I thought I could come home.</em></p>
         <button class="primary" data-action="start">${state.started ? 'Continue investigation' : 'Open the first file'}</button>
       </div>
       <div class="cover" aria-hidden="true"><i class="scene-dust"></i></div>
@@ -106,11 +106,11 @@ function puzzleContent(index) {
 }
 
 const locations = [
-  'Lost property office',
-  'Freight lift',
-  'Speaking-pipe works',
-  'Service stairs',
-  'The passage below'
+  'The wayhouse',
+  'The far bank',
+  'The echoing grotto',
+  'The gates below',
+  'The ascent'
 ];
 
 function locationHeader(index, title) {
@@ -146,7 +146,7 @@ function refreshPuzzle(button, message = '') {
   const sameControl = [...main.querySelectorAll('[data-action]')].find(control =>
     !control.disabled && control.dataset.action === button.dataset.action &&
     control.dataset.value === button.dataset.value);
-  const nextAction = { beat: 'send', send: 'hear-reply', walk: 'walk', gate: 'knock', look: 'gate' }[button.dataset.action];
+  const nextAction = { cross: 'beat', beat: 'send', send: 'hear-reply', walk: 'walk', gate: 'knock', look: 'gate' }[button.dataset.action];
   const fallback = (nextAction && puzzle.querySelector(`[data-action="${nextAction}"]:not(:disabled)`))
     || puzzle.querySelector('button:not(:disabled)');
   const effectTarget = {
@@ -157,10 +157,11 @@ function refreshPuzzle(button, message = '') {
     'test-line': '.pipe-grid'
   }[button.dataset.action];
   if (effectTarget) puzzle.querySelector(effectTarget)?.classList.add('is-playing');
-  if (['send', 'test-line', 'walk', 'knock', 'listen', 'gate'].includes(button.dataset.action)) {
+  if (['cross', 'send', 'test-line', 'walk', 'knock', 'listen', 'gate', 'forward'].includes(button.dataset.action)) {
     const location = main.querySelector('.location');
-    location.classList.remove('scene-response');
-    requestAnimationFrame(() => requestAnimationFrame(() => location.classList.add('scene-response')));
+    const effect = button.dataset.action === 'cross' ? 'scene-cross' : 'scene-response';
+    location.classList.remove(effect);
+    requestAnimationFrame(() => requestAnimationFrame(() => location.classList.add(effect)));
   }
   if (message) {
     const feedback = main.querySelector('#feedback');
